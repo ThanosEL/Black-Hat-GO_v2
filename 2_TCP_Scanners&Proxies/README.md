@@ -4,7 +4,6 @@ when querying a port to determine whether the port is open, closed, or filtered.
 
 #### Open Port
 If the port is open, a three-way handshake takes place. First, the client sends a syn packet,
-which signals the beginning of a communication. The server then responds with a syn-ack,
 or acknowledgment of the syn packet it received, prompting the client to finish with an ack, or acknowledgment of the servers response.
 ![alt text](images/image.png)
 
