@@ -36,23 +36,23 @@ In the `scanners` folder are different kinds of imprementations, each one
 improving on the previous. This progression shows why the naive approach 
 isn't enough, and how we get to a correct concurrent scanner.
 
-##### single-port-scanner.go
+#### single-port-scanner.go
 Dials a single TCP port (`scanme.nmap.org:80`) using `net.Dial`. If `err` 
 is `nil`, the connection succeeded. The most basic building block — no 
 loop, no concurrency.
 
-##### nonconcurrent-scanning.go
+#### nonconcurrent-scanning.go
 Loops through ports 1–1024 sequentially, dialing each one and closing the 
 connection if successful. Works, but slow — each port is scanned one at a 
 time, so it takes as long as the sum of all connection attempts.
 
-##### concurent-scanning.go
+#### concurent-scanning.go
 Wraps each `Dial` call in a goroutine to scan all ports at once. Much 
 faster, but broken: `main()` doesn't wait for the goroutines to finish, so 
 the program exits almost instantly, before most connections even complete. 
 Results are unreliable.
 
-##### synchronized-scanning.go
+#### synchronized-scanning.go
 Fixes the previous version using `sync.WaitGroup`. `wg.Add(1)` before each 
 goroutine, `wg.Done()` when it finishes, and `wg.Wait()` in `main()` blocks 
 until all scans are done. Correct and concurrent — but scanning too many 
