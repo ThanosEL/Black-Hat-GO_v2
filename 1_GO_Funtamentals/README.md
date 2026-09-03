@@ -93,13 +93,13 @@ type Friend interface {
 
 The following function, Greet(), takes a Friend interface as input and says hello in a Friend-specific way:
 ```go
-func Greetu (f Friendv) {
+func Greet (f Friendv) {
     f.SayHello()
 }
 ```
 
 ```go
-unc main() {
+func main() {
     var guy = new(Person)
     guy.Name = "Dave"    
     Greet(guy)
