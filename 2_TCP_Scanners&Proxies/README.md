@@ -68,7 +68,6 @@ Complete port scanner using two channels: `ports` (buffered) for work
 distribution and `results` for collecting outcomes. Workers send `0` for 
 closed, port number for open. `WaitGroup` is replaced by receiving exactly 
 1024 results — same synchronization, no counter. Output is sorted.
----
 
 
 # proxies
