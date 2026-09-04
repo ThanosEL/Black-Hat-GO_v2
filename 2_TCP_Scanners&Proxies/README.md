@@ -57,3 +57,14 @@ Fixes the previous version using `sync.WaitGroup`. `wg.Add(1)` before each
 goroutine, `wg.Done()` when it finishes, and `wg.Wait()` in `main()` blocks 
 until all scans are done. Correct and concurrent — but scanning too many 
 ports at once can still overwhelm the network/system and skew results.
+
+#### workerPool-scanner.go
+Introduces a worker pool using a buffered channel and `sync.WaitGroup`. 
+100 worker goroutines consume ports via `range`. No actual scanning — 
+demonstrates the pool pattern before adding network logic.
+
+#### tcp-scanner-final.go
+Complete port scanner using two channels: `ports` (buffered) for work 
+distribution and `results` for collecting outcomes. Workers send `0` for 
+closed, port number for open. `WaitGroup` is replaced by receiving exactly 
+1024 results — same synchronization, no counter. Output is sorted.
