@@ -28,7 +28,7 @@ system to proxy the connection around or through a firewall, a technique known a
 3. However, should an employee own an external system thats allowed through the firewall (for example, stacktitan.com)
 4. That employee can leverage the allowed domain to bounce connectionsto evil.com
 ![alt text](images/image4.png)
-
+---
 
 
 # Scanners
@@ -68,3 +68,46 @@ Complete port scanner using two channels: `ports` (buffered) for work
 distribution and `results` for collecting outcomes. Workers send `0` for 
 closed, port number for open. `WaitGroup` is replaced by receiving exactly 
 1024 results — same synchronization, no counter. Output is sorted.
+---
+
+
+# proxies
+#### io-example.go
+Demonstrates `io.Reader` and `io.Writer` interfaces by wrapping `stdin` and `stdout`
+in custom types `FooReader` and `FooWriter`. Shows both manual `Read()`/`Write()` 
+calls and the `io.Copy()` shorthand that replaces them.
+
+#### echo-server.go
+TCP server on port 20080 that echoes data back to the client. Uses `net.Listen()` 
+to bind, `listener.Accept()` to handle incoming connections, and `conn.Read()`/
+`conn.Write()` for raw I/O. Each connection runs in a goroutine via `go echo(conn)`.
+
+#### echo-server-improved.go
+Refactors the echo handler using `bufio.NewReader`/`bufio.NewWriter` for buffered I/O,
+replacing manual byte slice management. Final version simplifies further with 
+`io.Copy(conn, conn)` — passing `conn` as both source and destination.
+
+#### tcp-proxy.go
+A TCP port forwarder that proxies connections through an intermediary host.
+Listens on port 8080 and forwards all traffic to `localhost:9999`, using two
+`io.Copy` calls for bidirectional forwarding — one in a goroutine to prevent
+blocking.
+
+**Tested locally:**
+- `Target` = `nc -lvp 9999` (Terminal 1)
+- `Proxy`  = `go run proxy.go` — listens :8080, forwards to :9999 (Terminal 2)
+- `Client` = `nc localhost 8080` (Terminal 3)
+
+Confirmed bidirectional traffic: client→proxy→target and target→proxy→client.
+
+#### netcat.go
+Replicates Netcat's gaping security hole — a TCP listener on port 13337 that
+grants shell access to any connecting client. Uses `io.Pipe()` to synchronously
+connect `/bin/sh` stdout to the TCP connection, and assigns `conn` directly to
+`cmd.Stdin`. Any command sent by the client is executed on the server and the
+output is returned over the connection.
+
+**Tested with:**
+- `go run netcat.go` as the listener
+- `nc localhost 13337` as the connecting client
+- Confirmed remote command execution: `ls` returned server-side directory listing
