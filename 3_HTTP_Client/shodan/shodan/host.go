@@ -52,3 +52,45 @@ func (s *Client) HostSearch(q string) (*HostSearch, error) {
 	}
 	return &ret, nil
 }
+
+type Service struct {
+	Port      int      `json:"port"`
+	Transport string   `json:"transport"`
+	Data      string   `json:"data"`
+	Product   string   `json:"product"`
+	Version   string   `json:"version"`
+	CPE       []string `json:"cpe"`
+	Timestamp string   `json:"timestamp"`
+	Hostnames []string `json:"hostnames"`
+}
+
+type HostIPInfo struct {
+	IP         int64        `json:"ip"`
+	IPString   string       `json:"ip_str"`
+	OS         string       `json:"os"`
+	Org        string       `json:"org"`
+	ISP        string       `json:"isp"`
+	ASN        string       `json:"asn"`
+	Hostnames  []string     `json:"hostnames"`
+	Ports      []int        `json:"ports"`
+	Tags       []string     `json:"tags"`
+	Vulns      []string     `json:"vulns"`
+	LastUpdate string       `json:"last_update"`
+	Location   HostLocation `json:"location"`
+	Data       []Service    `json:"data"`
+}
+
+// look up details for a single IP address
+func (s *Client) HostIP(ip string) (*HostIPInfo, error) {
+	res, err := http.Get(fmt.Sprintf("%s/shodan/host/%s?key=%s", BaseURL, ip, s.apiKey))
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var ret HostIPInfo
+	if err := json.NewDecoder(res.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}

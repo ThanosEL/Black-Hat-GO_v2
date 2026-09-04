@@ -26,13 +26,16 @@ func main() {
 		info.ScanCredits)
 
 	// passing in a search string captured as a command line argument
-	hostSearch, err := s.HostSearch(os.Args[1])
+	hostInfo, err := s.HostIP(os.Args[1])
 	if err != nil {
 		log.Panic(err)
 	}
-
-	// loop through the results to display the IP and port
-	for _, host := range hostSearch.Matches {
-		fmt.Printf("%18s%8d\n", host.IPString, host.Port)
+	fmt.Printf("Org: %s\nISP: %s\nOS: %s\nHostnames: %v\nOpen Ports: %v\nTags: %v\nVulns: %v\nLast Update: %s\nCity: %s\nCountry: %s (%s)\nLat/Long: %.4f, %.4f\n\n",
+		hostInfo.Org, hostInfo.ISP, hostInfo.OS, hostInfo.Hostnames,
+		hostInfo.Ports, hostInfo.Tags, hostInfo.Vulns, hostInfo.LastUpdate,
+		hostInfo.Location.City, hostInfo.Location.CountryName, hostInfo.Location.CountryCode,
+		hostInfo.Location.Latitude, hostInfo.Location.Longitude)
+	for _, svc := range hostInfo.Data {
+		fmt.Printf("Port: %d (%s) — %s\n", svc.Port, svc.Transport, svc.Product)
 	}
 }
