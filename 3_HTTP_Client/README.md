@@ -47,3 +47,9 @@ to match the JSON keys.
 Local test server on `:8080` that serves `/ping` — returns a JSON response
 `{"Message":"...","Status":"..."}` to test `json-parsing.go` against a
 real endpoint.
+
+# shodan
+#### Building an HTTP Client That Interacts with Shodan.
+Build an HTTP client that interacts with the Shodan API, parsing the results and displaying relevant information.
+
+Shodan (https://www.shodan.io/), self-described as “the world’s first search engine for internet-connected devices,” facilitates passive reconnaissance by maintaining a searchable database of networked devices and services, including metadata such as product names, versions, locale, and more.
