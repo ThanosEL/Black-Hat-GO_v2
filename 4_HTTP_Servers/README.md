@@ -46,3 +46,12 @@ keystroke from a victim's browser back to the server in real time, via a
 small JS payload (delivered as a Go `html/template` so the WebSocket 
 address can be injected dynamically). Relevant in an XSS or compromised-
 web-server scenario.
+
+#### c2_mutliplexing
+A reverse HTTP proxy (`net/http/httputil` + `gorilla/mux`) that routes 
+incoming Meterpreter reverse-HTTP connections to different backend 
+listeners based on the `Host` header — the same mechanism virtual hosting 
+uses. Lets a single exposed IP/port (e.g. 80/443, likely allowed egress) 
+front multiple C2 listeners without exposing them directly, and hints at 
+domain fronting as a related technique.
+
