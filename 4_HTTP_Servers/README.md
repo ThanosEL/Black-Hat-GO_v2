@@ -31,3 +31,18 @@ attribute, etc.) — built-in XSS protection, unlike the lower-level
 `text/template` package. The `{{.}}` placeholder renders the entire 
 value passed to `Execute()`; `{{.FieldName}}` would reach into a specific 
 struct field if a struct were passed instead of a plain string.
+
+#### credential-harvester. 
+Clones a real login page (e.g. Roundcube webmail), rewrites the form's 
+`action` to point at a local `/login` handler instead of the real server, 
+and logs whatever credentials get submitted. Serves the cloned static 
+files via `http.FileServer` + `gorilla/mux`'s `PathPrefix("/")`, with 
+structured logging (`logrus`) writing captured attempts to a file. 
+Classic single-factor phishing technique.
+
+#### websocket_keylogger. 
+Uses `gorilla/websocket` to upgrade an HTTP connection and stream every 
+keystroke from a victim's browser back to the server in real time, via a 
+small JS payload (delivered as a Go `html/template` so the WebSocket 
+address can be injected dynamically). Relevant in an XSS or compromised-
+web-server scenario.
