@@ -46,3 +46,34 @@ masters { 192.168.177.132; };
   pentesters check for (`allow-transfer { any; }` would let anyone dump 
   the entire zone).
 
+
+## DNS
+#### get-a-record.go
+Sends a raw DNS query for an A record (`stacktitan.com` → `blackhatlab.local` 
+in this lab) using `github.com/miekg/dns`, and processes the response's 
+`Answer` slice via type assertion (`answer.(*dns.A)`) to pull out the actual 
+IP address. A records are the basic DNS record type mapping a hostname to 
+an IPv4 address — the foundation every other lookup in this chapter builds 
+on. Also demonstrates following CNAME chains: if a hostname doesn't have 
+a direct A record but instead points to another hostname via CNAME, you 
+follow that chain until you reach one that does.
+
+#### subdomain-guesser/
+A concurrent subdomain brute-forcer. Reads a wordlist, builds candidate 
+FQDNs (`word.domain.com`), and resolves each one against a DNS server 
+using a worker-pool pattern (goroutines + channels) — the same pattern 
+used for the concurrent port scanner in Chapter 2. Follows CNAME chains 
+until it reaches a real A record, so aliased subdomains still resolve 
+correctly. Tested against a local BIND9 lab (`blackhatlab.local`) instead 
+of a real target.
+
+Usage:
+```bash
+go run main.go -domain blackhatlab.local -wordlist subdomains.txt -server 192.168.177.132:53 -c 100
+```
+
+Scan with 5000 words:
+```
+-c 1	5.895s
+-c 100	0.663s
+```
