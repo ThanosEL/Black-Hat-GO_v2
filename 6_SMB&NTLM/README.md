@@ -139,8 +139,7 @@ domain compromise.
 go run main.go targets.txt Administrator LAB.LOCAL aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0
 ```
 
-*How NTLM Hashes Are Obtained (Overview)*
-
+#### *How NTLM Hashes Are Obtained (Overview)*
 Understanding where hashes come from in the first place helps explain why 
 pass-the-hash is such a persistent problem — hashes end up in a lot of 
 places, some more heavily defended than others.
