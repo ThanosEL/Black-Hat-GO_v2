@@ -47,15 +47,6 @@ actually possess the correct hash, it can't produce the response.
 
 ### The Handshake, Step by Step
 Client Server
-|------ Negotiate Protocol (dialects) -------->|
-|<----- Chosen dialect + auth options ---------|
-|------ Session Setup (NTLMSSP Negotiate) ----->|
-|<----- Session Setup (challenge token) --------|
-| [client computes NTLM hash + response] |
-|------ Session Setup (NTLMSSP Authenticate) -->|
-|<----- Session Setup (success + session ID) ---|
-|------ Requests using session ID ------------->|
-
 
 1. **Negotiate Protocol** — client tells the server which SMB dialects it 
    understands.
