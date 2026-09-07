@@ -116,4 +116,87 @@ mid-message.
 - **ASN.1 (X.690)** — the general-purpose encoding standard used by the 
   GSS-API layer
 
-  
+
+#### smb-password-guessing/
+Attempts SMB/NTLM authentication against a target using a list of 
+candidate usernames paired with a single password, checking which (if any) 
+succeed — a technique used to test for weak or default credentials across a domain.
+
+`Note:` Online password guessing can lock accounts out of a domain, effectively resulting in
+a denial-of-service attack. Take caution when testing your code and run this against
+only systems on which you’re authorized to test
+
+```
+go run main.go users.txt "Password123!" LAB.LOCAL 192.168.1.100
+```
+
+#### pass-the-hash/ 
+Attempts SMB authentication using a captured NTLM password hash directly, 
+without ever knowing (or needing) the plaintext password. Works because 
+NTLM authentication separates hash calculation from challenge-response 
+token calculation — the response computation only needs the hash as 
+input, not the domain/username/password that originally produced it. So 
+any precomputed hash (e.g. extracted from a compromised machine's memory) 
+is sufficient on its own to authenticate elsewhere.
+
+Iterates a list of target hosts, attempting authentication with the same 
+username + hash pair against each one — testing for credential/hash 
+reuse across a network, a common step in lateral movement during a 
+domain compromise.
+
+```
+go run main.go targets.txt Administrator LAB.LOCAL aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0
+```
+
+*How NTLM Hashes Are Obtained (Overview)*
+
+Understanding where hashes come from in the first place helps explain why 
+pass-the-hash is such a persistent problem — hashes end up in a lot of 
+places, some more heavily defended than others.
+
+##### 1. Memory extraction (LSASS)
+On a running Windows system, credentials used to log in are cached in 
+memory by the **LSASS** (Local Security Authority Subsystem Service) 
+process, in order to support single sign-on. An attacker with local 
+administrator access on a compromised machine can dump LSASS memory and 
+extract NTLM hashes (and sometimes even plaintext passwords, depending on 
+Windows configuration) for every account that has logged in since boot. 
+This is why gaining local admin on even one machine is often treated as a 
+serious event — it can expose credentials for other, more privileged 
+accounts that happened to log in there (e.g. IT staff doing support).
+
+##### 2. Local SAM database
+Every non-domain-controller Windows machine stores local account 
+password hashes in the **SAM** (Security Account Manager) database. An 
+attacker with sufficient local privileges can extract these hashes, 
+though they only cover local accounts, not domain accounts.
+
+##### 3. Domain controller database (NTDS.dit)
+Domain controllers store hashes for every domain account in a database 
+file called **NTDS.dit**. Compromising a domain controller (or obtaining 
+a valid backup of one) exposes the hashes for the entire domain at once — 
+this is one of the primary objectives of a full domain compromise.
+
+##### 4. Network capture and relay (no compromise required)
+NTLM authentication attempts sometimes occur automatically over a 
+network without explicit user action — for example, when a misconfigured 
+client tries to resolve a hostname via legacy broadcast protocols 
+(NBNS/LLMNR) instead of DNS. An attacker positioned on the same network 
+segment can respond to these broadcast requests, tricking the victim 
+machine into sending its NTLM challenge-response directly to the 
+attacker. Depending on configuration, the attacker can either:
+- Capture the exchange and attempt to crack the hash offline, or
+- **Relay** the authentication attempt in real time to a different target 
+  server, authenticating as the victim without ever needing the hash or 
+  password at all.
+
+This category is particularly notable because it doesn't require any 
+prior foothold or vulnerability — just network visibility and a 
+misconfiguration that's common in default Windows environments.
+
+##### 5. Credential dumping from configuration/scripts
+Hashes and even plaintext credentials sometimes end up stored in 
+scripts, configuration management tools, scheduled tasks, or Group 
+Policy Preferences (a legacy Windows feature with a well-known history 
+of storing recoverable credentials). These are typically found through 
+general file/system enumeration rather than a dedicated "attack" per se.
